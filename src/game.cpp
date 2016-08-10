@@ -13,8 +13,8 @@ using namespace std;
  ************************************************/
  Game::Game() {
 	// Create game render window
-	window.create(sf::VideoMode(1280, 720), "V-Novel");
-	window.setMouseCursorVisible(true);
+	 window.create(sf::VideoMode(1280, 720), "V-Novel");// , sf::Style::Fullscreen);
+	window.setMouseCursorVisible(false);
 	window.setKeyRepeatEnabled(false);
 
 	//window.setFramerateLimit(30);
@@ -22,7 +22,7 @@ using namespace std;
 
 	camera.setCenter(640, 360);
 
-	gameState_ = titleStart;
+	gameState_ = logos;
 	menuChoice_ = newChoice;
 
 	loadAssets();
@@ -68,12 +68,17 @@ void Game::handleEvent(sf::Event &event) {
 
 	// Pressing escape closes the window
 	if (sf::Event::KeyPressed)
-		if (event.key.code == sf::Keyboard::Escape) {
+		if (event.key.code == sf::Keyboard::Escape && (gameState_ == titleStart || gameState_ == titleScreen)) {
 			window.close();
 		}
 
 	// Switch statement controls what actions are done in each game state
 	switch (gameState_) {
+	case logos:
+		if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Return || event.key.code == sf::Keyboard::Space)) {
+			gameState_ = titleStart;
+		}
+		break;
 	case titleStart:
 		if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Return || event.key.code == sf::Keyboard::Space)) {
 			gameState_ = titleScreen;
@@ -140,6 +145,7 @@ void Game::handleEvent(sf::Event &event) {
 void Game::loadAssets() {
 	// Load game images
 	titleTexture.loadFromFile("..\\assets\\bg\\titlebg.png");
+	introTexture.loadFromFile("..\\assets\\bg\\WIP.png");
 	GOTexture.loadFromFile("..\\..\\assets\\bg\\gameover.png");
 	cursorTexture.loadFromFile("..\\assets\\sprites\\cursor.png");
 	// Load game music
@@ -152,9 +158,14 @@ void Game::loadAssets() {
 
 	// Set game images
 	title.setTexture(titleTexture);
+	title.setTextureRect(sf::IntRect(0, 0, 1280, 720));
 	title.setOrigin(0, 0);
 	title.setPosition(0, 0);
 	title.setColor(sf::Color(255,255,255,0));
+
+	introSprite.setTexture(introTexture);
+	introSprite.setOrigin(0, 0);
+	introSprite.setPosition(0, 0);
 
 	GOimage.setTexture(GOTexture);
 	GOimage.setOrigin(0, 0);
@@ -217,6 +228,34 @@ void Game::update() {
 	camera.zoom(1.0);
 	window.setView(camera);
 
+	// Updates for game logos
+	if (gameState_ == logos) {
+		counter++;
+		if (counter > 240) {
+			counter = 0;
+			gameState_ = titleStart;
+		}
+	}
+
+	// Update title screen animation
+	if (gameState_ == titleStart || gameState_ == titleScreen) {
+		if (bgCounter >= 80)
+			bgCounter = 0;
+		if (bgCounter < 19)
+			title.setTextureRect(sf::IntRect(0, 0, 1280, 720));
+		else if (bgCounter < 29)
+			title.setTextureRect(sf::IntRect(0, 720 * 1, 1280, 720));
+		else if (bgCounter < 39)
+			title.setTextureRect(sf::IntRect(0, 720 * 2, 1280, 720));
+		else if (bgCounter < 59)
+			title.setTextureRect(sf::IntRect(0, 720 * 3, 1280, 720));
+		else if (bgCounter < 69)
+			title.setTextureRect(sf::IntRect(0, 720 * 2, 1280, 720));
+		else if (bgCounter < 79)
+			title.setTextureRect(sf::IntRect(0, 720 * 1, 1280, 720));
+		bgCounter++;
+	}
+
 	if (gameState_ == titleStart) {
 		if (counter > 242)
 			counter = 0;
@@ -229,7 +268,7 @@ void Game::update() {
 	if (gameState_ == titleScreen) {
 		if (counter == 242)
 			counter = 0;
-		title.setColor(sf::Color(255, 255, 255, 246));
+		title.setColor(sf::Color(255, 255, 255, 250));
 		gameTitle.setPosition(700, 150);
 		contGame.setPosition(760, 280);
 		newGame.setPosition(760, 330);
@@ -296,6 +335,9 @@ void Game::render() {
 		window.draw(loadGame);
 		window.draw(exitGame);
 		window.draw(cursor);
+	}
+	else if (gameState_ == intro) {
+		window.draw(introSprite);
 	}
 	else if (gameState_ == inGame) {
 

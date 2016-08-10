@@ -12,11 +12,12 @@ const sf::Time TimePerFrame = sf::seconds(1.f / 60.f);
 class Game {
 private:
 	// Enumeration controls the different states the game goes into.
-	enum GameState {titleStart, titleScreen, intro, inGame, gameOver, pause} gameState_;
+	enum GameState {logos, titleStart, titleScreen, intro, inGame, gameOver, pause} gameState_;
 	enum MenuChoice {contChoice, newChoice, loadChoice, exitChoice} menuChoice_;
 
 	// Game objects
-	int counter = 0;
+	int counter = 0,
+		bgCounter = 0;
 
 	// SFML Objects
 	sf::RenderWindow window;
@@ -46,6 +47,8 @@ private:
 	// Background Pictures
 	sf::Sprite title;
 	sf::Texture titleTexture;
+	sf::Sprite introSprite;
+	sf::Texture introTexture;
 	sf::Sprite GOimage;
 	sf::Texture GOTexture;
 

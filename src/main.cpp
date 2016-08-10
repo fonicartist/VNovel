@@ -9,6 +9,8 @@
 using namespace std;
 
 int main() {
+	HWND hWnd = GetConsoleWindow();
+	ShowWindow(hWnd, SW_HIDE);
 	Game game;
 	game.mainLoop();
 	return 0;
