@@ -13,8 +13,8 @@ using namespace std;
  ************************************************/
  Game::Game() {
 	// Create game render window
-	 window.create(sf::VideoMode(1280, 720), "V-Novel");// , sf::Style::Fullscreen);
-	window.setMouseCursorVisible(false);
+	window.create(sf::VideoMode(1280, 720), "V-Novel");// , sf::Style::Fullscreen);
+	window.setMouseCursorVisible(true);
 	window.setKeyRepeatEnabled(false);
 
 	//window.setFramerateLimit(30);
@@ -75,22 +75,41 @@ void Game::handleEvent(sf::Event &event) {
 	// Switch statement controls what actions are done in each game state
 	switch (gameState_) {
 	case logos:
-		if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Return || event.key.code == sf::Keyboard::Space)) {
+		if (keyConfirmed(event) || event.type == event.MouseButtonPressed) {
 			gameState_ = titleStart;
 		}
 		break;
 	case titleStart:
-		if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Return || event.key.code == sf::Keyboard::Space)) {
+		if (keyConfirmed(event) || event.type == event.MouseButtonPressed) {
 			gameState_ = titleScreen;
 		}
 		break;
 	case titleScreen:
+		// Keyboard confirmation is separate from mouse for the menu confirmations.
 		if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Return || event.key.code == sf::Keyboard::Space)) {
 			switch (menuChoice_) {
 			//case contChoice: gameState_ = intro; break;
 			case newChoice: gameState_ = intro; break;
 			case loadChoice: gameState_ = intro; break;
 			case exitChoice: window.close(); break;
+			}
+		}
+		// Mouse confirmation has to reflect the position of the mouse.
+		else if (event.type == event.MouseButtonPressed) {
+			switch (menuChoice_) {
+			//case contChoice: gameState_ = intro; break;
+			case newChoice: 
+				if ((getMouseX() >= 755 && getMouseX() <= 975) && (getMouseY() >= 375 && getMouseY() <= 423))
+					gameState_ = intro;
+				break;
+			case loadChoice: 
+				if ((getMouseX() >= 755 && getMouseX() <= 855) && (getMouseY() >= 425 && getMouseY() <= 473))
+					gameState_ = intro;
+				break;
+			case exitChoice: 
+				if ((getMouseX() >= 755 && getMouseX() <= 855) && (getMouseY() >= 475 && getMouseY() <= 523))
+					window.close();
+				break;
 			}
 		}
 		else if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W)) {
@@ -107,7 +126,7 @@ void Game::handleEvent(sf::Event &event) {
 			case loadChoice: menuChoice_ = exitChoice; break;
 			}
 		}
-		/*else if (event.type == sf::Event::MouseMoved) {
+		else if (event.type == sf::Event::MouseMoved) {
 			if (event.mouseMove.x >= 755 && event.mouseMove.x <= 975) {
 				if (event.mouseMove.y >= 335 && event.mouseMove.y <= 383)
 					menuChoice_ = newChoice;
@@ -118,7 +137,7 @@ void Game::handleEvent(sf::Event &event) {
 				else if (event.mouseMove.y >= 435 && event.mouseMove.y <= 483)
 					menuChoice_ = exitChoice;
 			}
-		}*/
+		}
 		break;
 	case intro:
 		if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Return || event.key.code == sf::Keyboard::Space)) {
@@ -184,21 +203,25 @@ void Game::loadAssets() {
 	contGame.setCharacterSize(46);
 	contGame.setColor(sf::Color(150, 150, 150, 255));
 	contGame.setString("Continue");
-
+	contGame.setPosition(760, 280);
+	
 	newGame.setFont(chancery);
 	newGame.setCharacterSize(46);
 	newGame.setColor(sf::Color::White);
 	newGame.setString("New Game");
-
+	newGame.setPosition(760, 330);
+	
 	loadGame.setFont(chancery);
 	loadGame.setCharacterSize(46);
 	loadGame.setColor(sf::Color::White);
 	loadGame.setString("Load");
-
+	loadGame.setPosition(760, 380);
+	
 	exitGame.setFont(chancery);
 	exitGame.setCharacterSize(46);
 	exitGame.setColor(sf::Color::White);
 	exitGame.setString("Exit");
+	exitGame.setPosition(760, 430);
 
 }
 
@@ -209,10 +232,16 @@ void Game::checkMusic() {
 	else if (titleMusic.getStatus() == sf::Music::Playing && (gameState_ != titleStart && gameState_ != titleScreen))
 		titleMusic.stop();
 	// Play intro music
-	if (introMusic.getStatus() != sf::Music::Playing && gameState_ == intro)
-		introMusic.play();
-	else if (introMusic.getStatus() == sf::Music::Playing && gameState_ != intro)
+	if (introMusic.getStatus() != sf::Music::Playing && gameState_ == intro) {
+		if (introPlayed == false)
+			introMusic.play(); 
+		introMusic.setLoop(false);
+		introPlayed = true;
+	}
+	else if (introMusic.getStatus() == sf::Music::Playing && gameState_ != intro) {
+		introPlayed = false;
 		introMusic.stop();
+	}
 	// Play gameover music
 	if (gameOverMusic.getStatus() != sf::Music::Playing && gameState_ == gameOver)
 		gameOverMusic.play();
@@ -266,14 +295,10 @@ void Game::update() {
 			gameState_ = titleScreen;
 	}
 	if (gameState_ == titleScreen) {
-		if (counter == 242)
+		if (counter != 0)
 			counter = 0;
 		title.setColor(sf::Color(255, 255, 255, 250));
 		gameTitle.setPosition(700, 150);
-		contGame.setPosition(760, 280);
-		newGame.setPosition(760, 330);
-		loadGame.setPosition(760, 380);
-		exitGame.setPosition(760, 430);
 		switch (menuChoice_) {
 		case contChoice:
 			contGame.setColor(sf::Color(150, 150, 150, 255));
@@ -306,8 +331,7 @@ void Game::update() {
 
 	}
 	if (gameState_ == intro) {
-		counter++;
-		if (counter == 5880)
+		if (introMusic.getStatus() == sf::Music::Stopped)
 			gameState_ = inGame;
 	}
 	if (gameState_ == gameOver) {
@@ -348,6 +372,18 @@ void Game::render() {
 	
 	window.display();
 
+}
+
+bool Game::keyConfirmed(sf::Event &event) {
+	return (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Return || event.key.code == sf::Keyboard::Space));
+}
+
+int Game::getMouseX() {
+	return sf::Mouse::getPosition().x - window.getPosition().x;
+}
+
+int Game::getMouseY() {
+	return sf::Mouse::getPosition().y - window.getPosition().y;
 }
 
 /************************************************

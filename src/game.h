@@ -16,6 +16,7 @@ private:
 	enum MenuChoice {contChoice, newChoice, loadChoice, exitChoice} menuChoice_;
 
 	// Game objects
+	bool introPlayed = false;
 	int counter = 0,
 		bgCounter = 0;
 
@@ -71,6 +72,9 @@ public:
 	Game();
 	~Game();
 	void mainLoop();
+	bool keyConfirmed(sf::Event &event);
+	int getMouseX();
+	int getMouseY();
 
 };
 
