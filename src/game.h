@@ -16,7 +16,8 @@ private:
 	enum MenuChoice {contChoice, newChoice, loadChoice, exitChoice} menuChoice_;
 
 	// Game objects
-	bool introPlayed = false;
+	bool introPlayed = false,
+		 fullscreen = false;
 	int counter = 0,
 		bgCounter = 0;
 
@@ -41,6 +42,9 @@ private:
 			  introMusic,
 			  ingameMusic,
 			  gameOverMusic;
+
+	// Game Sounds
+	sf::Music chime;
 
 	// Game sounds but using music implementation
 	sf::Music pressEnter;
@@ -75,6 +79,7 @@ public:
 	bool keyConfirmed(sf::Event &event);
 	int getMouseX();
 	int getMouseY();
+	sf::Vector2i getMousePos();
 
 };
 

@@ -24,12 +24,18 @@
     <ClCompile Include="..\src\scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\event.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\src\game.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\src\scene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\event.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -66,7 +66,7 @@ void Game::handleEvent(sf::Event &event) {
 	if (event.type == sf::Event::Closed)
 		window.close();
 
-	// Pressing escape closes the window
+	// Close window by escape or set full screen
 	if (sf::Event::KeyPressed)
 		if (event.key.code == sf::Keyboard::Escape && (gameState_ == titleStart || gameState_ == titleScreen)) {
 			window.close();
@@ -99,15 +99,15 @@ void Game::handleEvent(sf::Event &event) {
 			switch (menuChoice_) {
 			//case contChoice: gameState_ = intro; break;
 			case newChoice: 
-				if ((getMouseX() >= 755 && getMouseX() <= 975) && (getMouseY() >= 375 && getMouseY() <= 423))
+				if ((getMouseX() >= 755 && getMouseX() <= 975) && (getMouseY() >= 355 && getMouseY() <= 403))
 					gameState_ = intro;
 				break;
 			case loadChoice: 
-				if ((getMouseX() >= 755 && getMouseX() <= 855) && (getMouseY() >= 425 && getMouseY() <= 473))
+				if ((getMouseX() >= 755 && getMouseX() <= 855) && (getMouseY() >= 405 && getMouseY() <= 453))
 					gameState_ = intro;
 				break;
 			case exitChoice: 
-				if ((getMouseX() >= 755 && getMouseX() <= 855) && (getMouseY() >= 475 && getMouseY() <= 523))
+				if ((getMouseX() >= 755 && getMouseX() <= 855) && (getMouseY() >= 455 && getMouseY() <= 503))
 					window.close();
 				break;
 			}
@@ -115,27 +115,38 @@ void Game::handleEvent(sf::Event &event) {
 		else if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Up || event.key.code == sf::Keyboard::W)) {
 			switch (menuChoice_) {
 			//case newChoice: menuChoice_ = contChoice; break;
-			case loadChoice: menuChoice_ = newChoice; break;
-			case exitChoice: menuChoice_ = loadChoice; break;
+			case loadChoice: menuChoice_ = newChoice; chime.play(); break;
+			case exitChoice: menuChoice_ = loadChoice; chime.play(); break;
 			}
 		}
 		else if (event.type == sf::Event::KeyPressed && (event.key.code == sf::Keyboard::Down || event.key.code == sf::Keyboard::S)) {
 			switch (menuChoice_) {
 			//case contChoice: menuChoice_ = newChoice; break;
-			case newChoice: menuChoice_ = loadChoice; break;
-			case loadChoice: menuChoice_ = exitChoice; break;
+			case newChoice: menuChoice_ = loadChoice; chime.play(); break;
+			case loadChoice: menuChoice_ = exitChoice; chime.play(); break;
 			}
 		}
 		else if (event.type == sf::Event::MouseMoved) {
-			if (event.mouseMove.x >= 755 && event.mouseMove.x <= 975) {
-				if (event.mouseMove.y >= 335 && event.mouseMove.y <= 383)
+			//if (event.mouseMove.x >= 755 && event.mouseMove.x <= 975) {
+			//	if (event.mouseMove.y >= 335 && event.mouseMove.y <= 383)
+			if (getMouseX() >= 765 && getMouseX() <= 985) {
+				if (getMouseY() >= 355 && getMouseY() <= 403) {
+					if (menuChoice_ != newChoice)
+						chime.play();
 					menuChoice_ = newChoice;
+				}
 			}
-			if (event.mouseMove.x >= 755 && event.mouseMove.x <= 855) {
-				if (event.mouseMove.y >= 385 && event.mouseMove.y <= 433)
+			if (getMouseX() >= 765 && getMouseX() <= 865) {
+				if (getMouseY() >= 405 && getMouseY() <= 453) {
+					if (menuChoice_ != loadChoice)
+						chime.play();
 					menuChoice_ = loadChoice;
-				else if (event.mouseMove.y >= 435 && event.mouseMove.y <= 483)
+				}
+				else if (getMouseY() >= 455 && getMouseY() <= 503) {
+					if (menuChoice_ != exitChoice)
+						chime.play();
 					menuChoice_ = exitChoice;
+				}
 			}
 		}
 		break;
@@ -171,6 +182,8 @@ void Game::loadAssets() {
 	titleMusic.openFromFile("..\\assets\\music\\Together.ogg");
 	introMusic.openFromFile("..\\assets\\music\\NowOrNever.ogg");
 	gameOverMusic.openFromFile("..\\..\\assets\\music\\gameover.ogg");
+	// Load game sounds
+	chime.openFromFile("..\\assets\\sounds\\chime.ogg");
 	// Load fonts
 	chancery.loadFromFile("..\\assets\\chancery.ttf");
 
@@ -192,7 +205,8 @@ void Game::loadAssets() {
 
 	cursor.setTexture(cursorTexture);
 	cursor.setOrigin(0, 0);
-	cursor.setPosition(720, 345);
+	cursor.setPosition(720, 340);
+	cursor.setScale(sf::Vector2f(1.0 / 2.75, 1.0 / 2.75));
 
 	gameTitle.setFont(chancery);
 	gameTitle.setCharacterSize(80);
@@ -233,8 +247,9 @@ void Game::checkMusic() {
 		titleMusic.stop();
 	// Play intro music
 	if (introMusic.getStatus() != sf::Music::Playing && gameState_ == intro) {
+		cout << introPlayed << endl;
 		if (introPlayed == false)
-			introMusic.play(); 
+			introMusic.play();
 		introMusic.setLoop(false);
 		introPlayed = true;
 	}
@@ -311,21 +326,21 @@ void Game::update() {
 			newGame.setColor(sf::Color::Yellow);
 			loadGame.setColor(sf::Color::White);
 			exitGame.setColor(sf::Color::White);
-			cursor.setPosition(720, 345);
+			cursor.setPosition(720, 340);
 			break;
 		case loadChoice: 
 			contGame.setColor(sf::Color(150, 150, 150, 255));
 			newGame.setColor(sf::Color::White);
 			loadGame.setColor(sf::Color::Yellow);
 			exitGame.setColor(sf::Color::White);
-			cursor.setPosition(720, 395);
+			cursor.setPosition(720, 390);
 			break;
 		case exitChoice: 
 			contGame.setColor(sf::Color(150, 150, 150, 255));
 			newGame.setColor(sf::Color::White);
 			loadGame.setColor(sf::Color::White);
 			exitGame.setColor(sf::Color::Yellow);
-			cursor.setPosition(720, 445);
+			cursor.setPosition(720, 440);
 			break;
 		}
 
@@ -379,11 +394,15 @@ bool Game::keyConfirmed(sf::Event &event) {
 }
 
 int Game::getMouseX() {
-	return sf::Mouse::getPosition().x - window.getPosition().x;
+	return window.mapPixelToCoords(getMousePos()).x;
 }
 
 int Game::getMouseY() {
-	return sf::Mouse::getPosition().y - window.getPosition().y;
+	return window.mapPixelToCoords(getMousePos()).y;
+}
+
+sf::Vector2i Game::getMousePos() {
+	return sf::Vector2i(sf::Mouse::getPosition().x - window.getPosition().x, sf::Mouse::getPosition().y - window.getPosition().y);
 }
 
 /************************************************

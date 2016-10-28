@@ -68,11 +68,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\src\event.cpp" />
     <ClCompile Include="..\src\game.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\scene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\event.h" />
     <ClInclude Include="..\src\game.h" />
     <ClInclude Include="..\src\scene.h" />
   </ItemGroup>
